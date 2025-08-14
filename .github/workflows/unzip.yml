@@ -1,0 +1,27 @@
+name: Auto Unzip on Push
+
+on:
+  push:
+    paths:
+      - "*.zip" # يشغل الأكشن بس لما ترفع ملف ZIP
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false # عشان نتحكم بالمفتاح
+      - name: Unzip files
+        run: unzip "*.zip" -d .
+      - name: Remove ZIP file
+        run: rm *.zip
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Unzipped files automatically" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
